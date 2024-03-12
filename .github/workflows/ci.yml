@@ -1,4 +1,4 @@
-name: Selenium Test
+name: good_Reads
 on: [push]
 jobs:
   build:
