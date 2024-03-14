@@ -27,5 +27,4 @@ jobs:
       run: echo "PYTHONPATH=${{ github.workspace }}" >> $GITHUB_ENV
 
     - name: Run tests
-      run: python test_runner.py
-      working-directory: ./API_tests
+      run: python API_tests.py
