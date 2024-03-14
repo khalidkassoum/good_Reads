@@ -1,50 +1,26 @@
-name: Continuous Integration
-
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-
+name: Selenium Test
+on: [ push ]
 jobs:
-  build-and-test:
+  build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [12.x, 14.x, 16.x]
+
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
+        name: Checkout code
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.10'
 
-    - name: Set up Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-    - name: Install dependencies
-      run: npm install
+      - name: Setup ChromeDriver
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: latest
 
-    - name: Run tests
-      run: npm test
-
-    - name: Build Docker image
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      run: docker build -t myapp:${{ github.sha }} .
-
-    - name: Push Docker image
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      run: |
-        echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
-        docker push myapp:${{ github.sha }}
-
-  notify-slack:
-    needs: build-and-test
-    runs-on: ubuntu-latest
-    if: always()
-    steps:
-    - name: Notify Slack
-      uses: 8398a7/action-slack@v3
-      with:
-        status: ${{ job.status }}
-        fields: repo,commit,author,action,eventName,ref,workflow
-      env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      - name: Run Selenium Test
+        run: python test/ask_author_test.py
