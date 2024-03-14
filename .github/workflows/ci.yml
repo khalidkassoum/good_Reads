@@ -28,4 +28,4 @@ jobs:
 
     - name: Run tests
       run: python test_runner.py
-      working-directory: ./api_tests
+      working-directory: ./API_tests
